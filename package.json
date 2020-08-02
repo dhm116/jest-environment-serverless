@@ -10,35 +10,49 @@
     "url": "https://github.com/fireeye/jest-environment-serverless/issues"
   },
   "license": "SEE LICENSE IN LICENSE.txt",
-  "main": "src/index.js",
+  "main": "release/index.js",
+  "types": "build/index.d.ts",
+  "typeScriptVersion": "4.0.0-beta",
   "keywords": [
     "jest",
     "serverless"
   ],
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "scripts": {
-    "test": "npx jest"
+    "prepublish": "npm run build",
+    "precommit": "npm run test",
+    "prebuild": "rm -rf ./build && rm -f tsconfig.tsbuildinfo",
+    "build": "mkdir -p ./build && npx tsc",
+    "postbuild": "cp src/lambda_wrapper.js release/ && cp build/index.js release/jest-environment-serverless.js && cp build/index.d.ts release/",
+    "dev": "npx tsc --watch",
+    "test": "npm run build && npx jest"
   },
   "dependencies": {
     "lambda-wrapper": "^0.3.0"
   },
   "devDependencies": {
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.1.0",
-    "eslint-config-prettier": "^6.10.0",
-    "eslint-plugin-import": "^2.20.1",
-    "eslint-plugin-jest": "^23.8.2",
-    "jest": "^25.1.0",
-    "jest-cli": "^25.1",
-    "jest-config": "^25.1",
-    "jest-runtime": "^25.1",
-    "@jest/console": "^25.1",
-    "serverless": "^1.66.0"
+    "@babel/core": "^7.10.5",
+    "@babel/preset-env": "^7.10.4",
+    "@babel/preset-typescript": "^7.10.4",
+    "@jest/console": "^26.1",
+    "babel-jest": "^26.1.0",
+    "eslint": "^7.5",
+    "eslint-config-airbnb-base": "^14.2",
+    "eslint-config-prettier": "^6.11",
+    "eslint-plugin-import": "^2.22",
+    "eslint-plugin-jest": "^23.19",
+    "jest": "^26.1",
+    "jest-cli": "^26.1",
+    "jest-config": "^26.1",
+    "jest-runtime": "^26.1",
+    "serverless": "^1.77",
+    "tsutils": "^3.17.1",
+    "typescript": "^4.0.0-beta"
   },
   "peerDependencies": {
-    "jest-environment-node": "23.x || 24.x || 25.x",
+    "jest-environment-node": ">=23.x",
     "serverless": ">=1.46"
   },
   "jest": {
@@ -49,8 +63,8 @@
     "silent": true,
     "testEnvironment": "node",
     "testMatch": [
-      "**/__tests__/**/?(*.)+(spec|test).js?(x)",
-      "**/?(*.)+(spec|test).js?(x)"
+      "**/__tests__/**/?(*.)+(spec|test).(j|t)s?(x)",
+      "**/?(*.)+(spec|test).(j|t)s?(x)"
     ],
     "verbose": true
   }

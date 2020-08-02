@@ -34,6 +34,7 @@ bower_components
 # Compiled binary addons (http://nodejs.org/api/addons.html)
 build/Release
 build/
+release/
 
 # Dependency directories
 node_modules/
@@ -60,3 +61,9 @@ typings/
 
 # VSCode
 .vs/
+
+# Prevent nested dependencies from being locked out of security updates
+package-lock.json
+
+# Typescript
+*.tsbuildinfo

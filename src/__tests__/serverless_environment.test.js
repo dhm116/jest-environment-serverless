@@ -5,7 +5,7 @@ const Runtime = require('jest-runtime');
 const { CustomConsole } = require('@jest/console');
 
 const path = jest.requireActual('path');
-const ServerlessEnvironment = jest.requireActual('../');
+const ServerlessEnvironment = jest.requireActual('../../release');
 const Serverless = jest.requireActual('serverless');
 
 describe('ServerlessEnvironment', () => {
@@ -33,10 +33,10 @@ describe('ServerlessEnvironment', () => {
 
     env1.fakeTimers.useFakeTimers();
 
-    const timer1 = env1.global.setTimeout(() => { }, 0);
-    const timer2 = env1.global.setInterval(() => { }, 0);
+    const timer1 = env1.global.setTimeout(() => {}, 0);
+    const timer2 = env1.global.setInterval(() => {}, 0);
 
-    [timer1, timer2].forEach(timer => {
+    [timer1, timer2].forEach((timer) => {
       expect(timer.id).toBeDefined();
       expect(typeof timer.ref).toBe('function');
       expect(typeof timer.unref).toBe('function');
@@ -48,14 +48,14 @@ describe('ServerlessEnvironment', () => {
     const env1 = new ServerlessEnvironment(config);
 
     // Verify updated config properties
-    ['setupFiles', 'coveragePathIgnorePatterns'].forEach(field => {
+    ['setupFiles', 'coveragePathIgnorePatterns'].forEach((field) => {
       expect(config).toHaveProperty(field);
       expect(Array.isArray(config[field])).toBeTruthy();
     });
 
     expect(env1.global.ServerlessWrapper).toBeDefined();
     // Verify global context properties
-    ['Serverless', 'rootDir', 'serverless'].forEach(field =>
+    ['Serverless', 'rootDir', 'serverless'].forEach((field) =>
       expect(env1.global.ServerlessWrapper).toHaveProperty(field)
     );
     expect(env1.global.ServerlessWrapper.Serverless).toBe(Serverless);
@@ -80,7 +80,7 @@ describe('ServerlessEnvironment', () => {
     new ServerlessEnvironment(config);
     /* eslint-disable no-new */
 
-    expect(config.setupFiles).toEqual([path.join(__dirname, '../', 'lambda_wrapper.js')]);
+    expect(config.setupFiles).toEqual([path.join(__dirname, '../../release/', 'lambda_wrapper.js')]);
   });
 
   describe('setEnv', () => {
@@ -120,7 +120,10 @@ describe('ServerlessEnvironment', () => {
 
       await slsEnv.setup();
 
-      new Runtime(config, slsEnv, context.resolver, context.hasteFS);
+      const runtime = new Runtime(config, slsEnv, context.resolver, context.hasteFS);
+      // Jest 25.2 branch no longer auto-imports setupFiles when creating
+      // a new Runtime >:(
+      config.setupFiles.forEach((path) => runtime.requireActual(path));
 
       // eslint-disable-next-line prefer-destructuring
       LambdaWrapper = slsEnv.global.LambdaWrapper;
@@ -139,8 +142,7 @@ describe('ServerlessEnvironment', () => {
 
     describe('setEnv', () => {
       it('uses the supplied Serverless instance if provided', async () => {
-        slsEnv.global.ServerlessWrapper.serverless.service.functions.hello.environment.testEnvVar =
-          'some value';
+        slsEnv.global.ServerlessWrapper.serverless.service.functions.hello.environment.testEnvVar = 'some value';
 
         await LambdaWrapper.getWrapper('hello');
 
